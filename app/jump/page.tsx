@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 "use client";
 import { useEffect, useRef, useState } from "react";
 import * as Phaser from "phaser";
@@ -55,10 +57,9 @@ export default function JumpPage() {
       const res = await MiniKit.commands.pay({
         reference: `revive-${Date.now()}`,
         description: "Revive in Jump Game",
-        payments: [{ token: "WLD", amount: "0.01" }],
-      });
-      console.log("pay result:", res);
-      // TODO: 支付成功后复活/加体力
+        token: "WLD",
+        amount: "0.01",
+      } as any);
     } catch (e) { console.error(e); alert("支付失败或取消"); }
     finally { setReviving(false); }
   }
