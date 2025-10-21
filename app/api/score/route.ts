@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getDB } from '../../../lib/db'
+import { getDB } from '@/lib/db'
 
 export async function GET() {
   const db = await getDB()
@@ -12,7 +12,7 @@ export async function GET() {
 // body: { id: string; score: number }
 export async function POST(req: Request) {
   try {
-    const { id, score } = await req.json() as { id?: string; score?: number }
+    const { id, score } = (await req.json()) as { id?: string; score?: number }
     if (!id || typeof score !== 'number') {
       return NextResponse.json({ error: 'bad_request' }, { status: 400 })
     }
