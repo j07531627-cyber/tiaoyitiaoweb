@@ -9,11 +9,13 @@
   },
   "dependencies": {
     "@safe-global/protocol-kit": "^6.1.1",
+    "@vercel/kv": "^3.0.0",
     "@wagmi/core": "^2.22.1",
     "@worldcoin/minikit-js": "1.9.8",
     "@worldcoin/minikit-react": "^1.9.9",
     "clsx": "^2.1.1",
     "eruda": "^3.4.3",
+    "lowdb": "7",
     "next": "15.2.3",
     "next-auth": "^4.24.11",
     "phaser": "3.90.0",
