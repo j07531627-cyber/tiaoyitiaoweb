@@ -7,11 +7,11 @@ export class JumpScene extends Phaser.Scene {
   score = 0
   scoreText!: Phaser.GameObjects.Text
   alive = false
-  onGameOver?: (score: number) => void
 
-  constructor() {
-    super('JumpScene')
-  }
+  // 永远可用的总线
+  public bus = new Phaser.Events.EventEmitter()
+
+  constructor() { super('JumpScene') }
 
   preload() {
     this.load.image('ground', 'https://i.imgur.com/WP7xS3S.png')
@@ -19,40 +19,33 @@ export class JumpScene extends Phaser.Scene {
   }
 
   create() {
-    const w = this.scale.width
-    const h = this.scale.height
-
+    const w = this.scale.width, h = this.scale.height
     this.platforms = this.physics.add.staticGroup()
-    this.platforms.create(w / 2, h - 20, 'ground').setScale(0.5).refreshBody()
+    this.platforms.create(w/2, h-20, 'ground').setScale(0.5).refreshBody()
 
-    this.player = this.physics.add
-      .sprite(w / 2, h - 60, 'player')
-      .setBounce(0.2)
-      .setCollideWorldBounds(true)
-
+    this.player = this.physics.add.sprite(w/2, h-60, 'player')
+      .setBounce(0.2).setCollideWorldBounds(true)
     this.physics.add.collider(this.player, this.platforms)
+
     this.cursors = this.input.keyboard!.createCursorKeys()
-    this.scoreText = this.add.text(12, 12, 'Score: 0', {
-      fontSize: '18px',
-      color: '#fff',
-    })
+    this.scoreText = this.add.text(12, 12, 'Score: 0', { fontSize:'18px', color:'#fff' })
 
     this.start()
+    this.bus.emit('ready')
   }
 
   start() {
     this.score = 0
     this.alive = true
-    this.player.setPosition(this.scale.width / 2, this.scale.height - 60)
-    this.player.setVelocity(0, -250)
+    this.player.setPosition(this.scale.width/2, this.scale.height-60).setVelocity(0,-250)
   }
 
   revive() {
     this.alive = true
-    this.player.setVelocity(0, -300)
+    this.player.setVelocity(0,-300)
   }
 
-  update(_t: number, d: number) {
+  update(_t:number, d:number) {
     if (!this.alive) return
     if (this.cursors.left?.isDown) this.player.setVelocityX(-160)
     else if (this.cursors.right?.isDown) this.player.setVelocityX(160)
@@ -63,8 +56,7 @@ export class JumpScene extends Phaser.Scene {
 
     if (this.player.y > this.scale.height + 10) {
       this.alive = false
-      this.onGameOver?.(Math.floor(this.score))
+      this.bus.emit('gameover', Math.floor(this.score))
     }
   }
 }
-

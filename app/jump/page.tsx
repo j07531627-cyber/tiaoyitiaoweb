@@ -1,13 +1,15 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { MiniKit } from '@worldcoin/minikit-js'
+import type * as PhaserNS from 'phaser'
 
 type Row = { id:string; score:number; ts:number }
 
 export default function JumpPage() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const gameRef = useRef<any>(null)
+  const gameRef = useRef<PhaserNS.Game | null>(null)
   const sceneRef = useRef<any>(null)
+
   const [latestScore, setLatestScore] = useState(0)
   const [reviving, setReviving] = useState(false)
   const [top, setTop] = useState<Row[]>([])
@@ -18,9 +20,12 @@ export default function JumpPage() {
     ;(async () => {
       const Phaser = await import('phaser')
       const { JumpScene } = await import('@/components/game/JumpScene')
+
       sceneRef.current = new JumpScene()
-      sceneRef.current.events.on('gameover', (s:number) => setLatestScore(s))
-      const config: any = {
+      // 监听自定义总线事件，立刻可用
+      sceneRef.current.bus.on('gameover', (s:number) => setLatestScore(s))
+
+      const config: PhaserNS.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         width: 400, height: 600,
         parent: containerRef.current ?? undefined,
@@ -30,7 +35,7 @@ export default function JumpPage() {
       }
       if (!destroyed) gameRef.current = new Phaser.Game(config)
     })()
-    return () => { destroyed = true; gameRef.current?.destroy?.(true) }
+    return () => { destroyed = true; gameRef.current?.destroy(true) }
   }, [])
 
   useEffect(() => {
@@ -52,7 +57,7 @@ export default function JumpPage() {
       await fetch('/api/score', {
         method:'POST',
         headers:{ 'content-type':'application/json' },
-        body: JSON.stringify({ id: uid, score: latestScore })
+        body: JSON.stringify({ id: uid, score: latestScore }),
       })
       fetch('/api/score').then(r=>r.json()).then(d=>setTop(d.top ?? []))
       alert('已复活并上报分数')
